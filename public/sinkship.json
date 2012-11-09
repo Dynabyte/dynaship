@@ -1,0 +1,65 @@
+{
+	"id": 2,
+	"board": [
+		[
+			{
+				"state": "Hit",
+				"ship": "Coastguard"
+			},
+			{
+				"state": "Unknown",
+				"ship": null
+			},
+			{
+				"state": "Unknown",
+				"ship": null
+			}
+		],
+		[
+			{
+				"state": "Unknown",
+				"ship": null
+			},
+			{
+				"state": "Hit",
+				"ship": 1
+			},
+			{
+				"state": "Unknown",
+				"ship": null
+			}
+		],
+		[
+			{
+				"state": "Miss",
+				"ship": null
+			},
+			{
+				"state": "Hit",
+				"ship": 1
+			},
+			{
+				"state": "Miss",
+				"ship": null
+			}
+		]
+	],
+	"bombs": 1,
+	"boats": [
+		{
+			"id": 1,
+			"length": 2,
+			"alive": false
+		},
+		{
+			"id": 2,
+			"length": 1,
+			"alive": true
+		},
+		{
+			"id": "Coastguard",
+			"length": 2,
+			"alive": true
+		}
+	]
+}
