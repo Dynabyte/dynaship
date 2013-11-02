@@ -93,6 +93,125 @@ var defaultBoardAnswer = {
     ]
 }
 
+var randomIntegerBetween = function (a, b) {
+  return Math.floor(Math.random()*b + a);
+};
+
+var randomBoolean = function () {
+  return randomIntegerBetween(0, 2) === 0; 
+};
+
+var generate = function (battleAreaSize, ships) {
+  var battleArea = [];
+  for (var i = 0; i < battleAreaSize; i++) {
+    var row = [];
+    for (var j = 0; j < battleAreaSize; j++) {
+      row[j] = {
+        ship : undefined,
+        shot : false,
+        state : "", 
+      };
+    }
+    battleArea.push(row);
+  }
+
+  ships.forEach(function (ship) {
+    var shipWillBeWithinBoard = false;
+    var shipWillNotCollideWithOtherShips = false;
+    var vertical = randomBoolean(),
+      x = randomIntegerBetween(0, battleAreaSize),
+      y = randomIntegerBetween(0, battleAreaSize);
+
+    while(!shipWillBeWithinBoard && !shipWillNotCollideWithOtherShips) {
+      var collision = false;
+      if((vertical && y+ship.size > battleAreaSize) || (!vertical && x+ship.size > battleAreaSize)) {
+        vertical = randomBoolean(),
+        x = randomIntegerBetween(0, battleAreaSize ),
+        y = randomIntegerBetween(0, battleAreaSize );
+      } else {
+        shipWillBeWithinBoard = true;
+      }
+
+      if(shipWillBeWithinBoard) {
+        if(vertical){
+          if(ship.size == 1){
+            if(battleArea[x][y].ship !== undefined) {
+              if(battleArea[x][y].ship.id != ship.id){
+                collision = true;  
+              }
+            }
+          } else {
+            for(var i = 0, j = y; i < ship.size; i++){
+              if(battleArea[x][j].ship !== undefined){
+                if(battleArea[x][j].ship.id != ship.id){
+                  collision = true;  
+                }
+              }
+              j++;
+            }
+          }
+        } else {
+          if(ship.size == 1){
+            if(battleArea[x][y].ship !== undefined) {
+              if(battleArea[x][y].ship.id != ship.id){
+                collision = true;  
+              }
+            }
+          } else {
+            for(var i = 0, j = x; i < ship.size; i++){
+              if(battleArea[j][y].ship !== undefined){
+                if(battleArea[j][y].ship.id != ship.id){
+                  collision = true;
+                }
+              }
+              j++;
+            }
+          }
+        }
+        if(!collision){
+          shipWillNotCollideWithOtherShips = true;
+        } else {
+          shipWillBeWithinBoard = false;
+          shipWillNotCollideWithOtherShips = false;
+          vertical = randomBoolean(),
+          x = randomIntegerBetween(0, battleAreaSize ),
+          y = randomIntegerBetween(0, battleAreaSize );
+        }
+      }
+    }
+    
+    for (var i = 0; i < ship.size; i++) {
+      battleArea[x][y].ship = ship.id;
+      vertical ? y++ : x++;
+    }
+  });
+  
+  return battleArea;
+};
+
+function printShip(ship){
+  if(ship == 1){
+    return "#FF0000";
+  } else if(ship == 2)  {
+    return "#00FF00";
+  } else if(ship == 3) {
+    return "#0000FF";
+  } else if(ship == 4) {
+    return "#FFFF00";
+  } else {
+    return "#00FFFF";
+  }
+}
+
+var ships = [
+  {id : 1, size : 5, state: "alive", life: 5},
+  {id : 2, size : 4, state: "alive", life: 4},
+  {id : 3, size : 3, state: "alive", life: 3},
+  {id : 4, size : 2, state: "alive", life: 2},
+  {id : 5, size : 1, state: "alive", life: 1},
+];
+var battleArea = generate(10, ships);
+
 var Game = {
     boards: {},
     boardSize: 3,
