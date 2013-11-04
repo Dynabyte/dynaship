@@ -7,9 +7,6 @@ exports.post = function(req, res) {
 
   var querystring = require('querystring');  
   var http = require('http');  
-  
-  var post_data = querystring.stringify({board: req.body.data });
-  console.log(post_data);
 
   var url = req.body.player.replace(/http[s]?:\/\//, '');
   var path = '/';
@@ -30,13 +27,14 @@ exports.post = function(req, res) {
     path: path,  
     method: 'POST',  
     headers: {  
-      'Content-Type': 'application/x-www-form-urlencoded',  
-      'Content-Length': post_data.length  
+      'Content-Type': 'application/json',  
+      'Content-Length': JSON.stringify(req.body.data).length  
     }  
   };  
-
-  console.log(post_data);
+  //console.log(req.body.data);
+  //console.log(post_options);
   
+
   try {
     var post_req = http.request(post_options, function(result) {  
       result.setEncoding('utf8');  
@@ -52,7 +50,7 @@ exports.post = function(req, res) {
     post_req.on('error', function() {
       res.send('Fail');
     });
-    post_req.write(post_data);  
+    post_req.write(JSON.stringify(req.body.data));  
     post_req.end();
   } catch (e) {
     res.send('Fail');

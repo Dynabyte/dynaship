@@ -1,4 +1,4 @@
-var tempBoard = {
+/*var tempBoard = {
     "id": 2,
     "board": [
         [
@@ -91,7 +91,7 @@ var defaultBoardAnswer = {
             "dir": "down"
         }
     ]
-}
+}*/
 
 var randomIntegerBetween = function (a, b) {
   return Math.floor(Math.random()*b + a);
@@ -208,11 +208,190 @@ var ships = [
   {id : 2, size : 4, state: "alive", life: 4},
   {id : 3, size : 3, state: "alive", life: 3},
   {id : 4, size : 2, state: "alive", life: 2},
-  {id : 5, size : 1, state: "alive", life: 1},
+  {id : 5, size : 3, state: "alive", life: 3},
+  {id : 6, size : 5, state: "alive", life: 5},
+  {id : 7, size : 2, state: "alive", life: 2},
+  {id : 8, size : 2, state: "alive", life: 2},
 ];
-var battleArea = generate(10, ships);
 
-var Game = {
+
+function renderJsonMessage(player) {
+    var json = {
+        size: player.board.length
+    };
+    var maskedShips = [];
+    for (var i = 0; i < player.ships.length; i++) {
+        maskedShips.push({
+            id: player.ships[i].id,
+            length: player.ships[i].size,
+            alive: player.ships[i].life > 0
+        });
+    }
+    json.ships = maskedShips;
+
+    var shots = [];
+    for (var x in player.board) {
+        for (var y in player.board[x]) {
+            var position = player.board[x][y];
+            
+            if (position.shot == true) {
+                var toReturn = {
+                    coordinates: {
+                        x: x,
+                        y: y
+                    }
+                };
+                if (position.ship) {
+                    toReturn.state = "Seaworthy";
+                    for (var i = 0; i < player.ships.length; i++) {
+                        if (player.ships[i].id == position.ship && player.ships[i].life == 0) {
+                            toReturn.state = "Capsized";
+                        }
+                    }
+                } else {
+                    toReturn.state = "Missed";
+                }
+                shots.push(toReturn);
+            }
+
+        }
+    }
+
+    json.shots = shots;
+
+    return json;
+}
+
+function askForMove(player, success, error) {
+    var url = player.url
+    var move;
+    $.ajax({
+        type: 'POST',
+        url: '/post/',
+        data: JSON.stringify({
+            player: decodeURIComponent(url).trim(),
+            data: renderJsonMessage(player)
+        }),
+        async: true,
+        success: success,
+        error: error,
+        dataType: 'json',
+        contentType: 'application/json',
+        timeout: 500
+    });
+}
+
+function renderBoard(player) {
+    return '<div class="playerBoard" data-name="'+player.name+'">'+player.name+'</div>';
+}
+
+function shootAt(player, x, y) {
+    var position = player.board[x][y],
+        shot = position.shot,
+        ship = position.ship;
+
+    if (!shot) {
+        player.board[x][y].shot = true;
+        if (ship) {
+            for (var i = 0; i < player.ships.length; i++) {
+                if (ship == player.ships[i].id) {
+                    player.ships[i].life = player.ships[i].life - 1;
+                }
+            }
+        }
+    }
+}
+
+var Round = function (element, playerBoards, round, gameOverCallback) {
+    element.html("Playing round " + round + "!<br>");
+    for (var i = 0; i < playerBoards.length; i++) {
+        element.append(renderBoard(playerBoards[i]));
+    }
+
+    var gotMoves = [];
+    function gotMove(player, coordinates) {
+        gotMoves.push({player: player, coordinates: coordinates});
+
+        if (coordinates) {
+            shootAt(player, coordinates.x, coordinates.y);    
+        }
+        
+        if (gotMoves.length == playerBoards.length) {
+            element.find('button.next').removeAttr('disabled');
+        }
+    }
+
+    for (var i = 0; i < playerBoards.length; i++) {
+        askForMove(playerBoards[i], 
+            function (player) { return function (data) {
+                gotMove(player, data);
+            }}(playerBoards[i]), 
+            function (player) { return function () { 
+                gotMove(player, undefined);
+            }}(playerBoards[i]));
+    }
+
+    element.append('<button class="next" disabled="disabled">Next round!</button>');
+    element.find('button.next').click(function () {
+        console.log(playerBoards);
+        new Round(element, playerBoards, round + 1, gameOverCallback);
+    });
+};
+
+var Game = function(element, players, gameOverCallback) {
+    var board = generate(30, ships);
+
+    var playerBoards = [];
+    for (player in players) {
+        playerBoards.push({
+            name: player,
+            url: players[player],
+            board: JSON.parse(JSON.stringify(board)),
+            ships: JSON.parse(JSON.stringify(ships))
+        });
+    }
+
+    new Round(element, playerBoards, 1, gameOverCallback);
+};
+
+
+var Players = function (element, initCallback) {
+    var players = {};
+
+    var form = '<input type="text" name="url" class="url" placeholder="Url to AI"/> '
+        +'<input type="text" name="playername" class="playername" placeholder="Player name"/>'
+        +'<button class="addPlayer">Add player</button>';
+
+    function render() {
+        var stuff = form;
+
+        element.html(stuff);
+
+        for (name in players) {
+            element.append('<br><span>' + name + '</span> <span>' + players[name] + '</span>');
+        }
+
+        element.append('<br><br><button class="init">Start game</button>');
+
+        element.find('button.addPlayer').click(function () {
+            var url = element.find("input.url");
+            var name = element.find("input.playername");
+            players[name.val()] = url.val();
+            name.val("");
+            url.val("");
+            render();
+        });
+        element.find('button.init').click(function () {
+            initCallback(players);
+        });
+    }
+
+
+    render();
+    return {};
+};
+
+/*var Game = {
     boards: {},
     boardSize: 3,
     boats: {
@@ -372,18 +551,30 @@ RenderEngine = {
         table += '</table>'
         $id.html(table)
     }
-}
+}*/
 
 $(function() {
-    $('#start').click(function() {
-        var player1 = $('#player1').val();
-        var player2 = $('#player2').val();
-        Game.startGame(player1, player2);
-        return false;
+
+    var players = new Players($("#addPlayers"), function (players) {
+        $("#addPlayers").hide();
+        new Game($("#boards"), players, function(){console.log("Game over man, game over.")});
     });
 
-    $('#step').click(function() {
-        Game.step();
-        return false;
-    });
+    $('#addPlayers input.url').val('http://localhost:9000/getMove');
+    $('#addPlayers input.playername').val('The I');
+    $('#addPlayers button.addPlayer').click();
+
+    $('#addPlayers input.url').val('http://192.168.52.164:8080/make-move');
+    $('#addPlayers input.playername').val('The John');
+    $('#addPlayers button.addPlayer').click();
+
+    $('#addPlayers input.url').val('http://192.168.52.217:8080/dynaship/get-move');
+    $('#addPlayers input.playername').val('Batmans friend');
+    $('#addPlayers button.addPlayer').click();
+
+    /*$('#addPlayers input.url').val('http://192.168.52.220:8080');
+    $('#addPlayers input.playername').val('The Nils');
+    $('#addPlayers button.addPlayer').click();*/
+
+    $('#addPlayers button.init').click();
 });
