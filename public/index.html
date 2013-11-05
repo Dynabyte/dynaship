@@ -13,6 +13,57 @@
         <link rel="stylesheet" href="stylesheets/normalize.css">
         <link rel="stylesheet" href="stylesheets/main.css">
         <script src="javascripts/vendor/modernizr-2.6.1.min.js"></script>
+        <style>
+        div.playerBoard {
+    float: left;
+    text-align: center;
+}
+ 
+div.playerBoard.done {
+    background: green;
+}
+ 
+div.scores span {
+    float: left;
+    position: relative;
+    left: 20px;
+}
+b.number {
+    font-family: Consolas, "Liberation Mono", Courier, monospace;;
+    width: 20px;
+    display: inline-block;
+    background-color: gray;
+    color: white;
+}
+table {
+    padding: 0px;
+    margin: 10px;
+    font-size: 6px;
+    line-height: 6px;
+}
+tr {
+    margin: 0px;
+    padding: 0px;
+}
+td.position {
+    width: 10px;
+    height: 10px;
+    background-color: gray;
+    margin: 0px;
+    padding: 0px;
+}
+ 
+td.sea {
+    background-color: blue;
+}
+ 
+td.seaworthy {
+    background-color: red;
+}
+ 
+td.capsized {
+    background-color: green;
+}</style>
     </head>
     <body>
     <div id="addPlayers"></div>        
