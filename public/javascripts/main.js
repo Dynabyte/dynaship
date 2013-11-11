@@ -191,9 +191,14 @@ function renderBoard(player, round) {
         done = " done";
         round = player.round;
     }
+
+    var shipHealth = 0;
+    for (var i = 0; i < player.ships.length; i++) {
+        shipHealth += player.ships[i].life;
+    }
+
+
     var board = '<div class="playerBoard'+done+'"><span class="theName">' + player.name + '</span><table>';
-    var hits = 0;
-    var shot = 0;
     var last = player.shots[player.shots.length - 1];
     for (var y = 0; y < player.board.length; y++) {
         board += "<tr>"
@@ -205,9 +210,7 @@ function renderBoard(player, round) {
                 content = '#';
             }
             if (position.shot) {
-                shot += 1;
                 if (position.ship) {
-                    hits += 1;
                     state = 'seaworthy';
                     for (var i in player.ships) {
                         if (player.ships[i].id == position.ship && player.ships[i].life == 0) {
@@ -230,7 +233,7 @@ function renderBoard(player, round) {
  
     board += '<div class="scores">'
         +'<span><b class="number">'+round+'</b> rounds</span>'
-        +'<span><b class="number">'+hits+'</b> hits!</span></div>';
+        +'<span><b class="number">'+shipHealth+'</b> left!</span></div>';
  
     board += '</div>';
  
@@ -417,8 +420,9 @@ $(function() {
 
     var players = new Players($("#addPlayers"), function (players) {
         $("#addPlayers").hide();
-        new Game($("#boards"), players, function(){
+        new Game($("#boards"), players, function(players){
             console.log("Game over man, game over.");
+            console.log(players);
         });
     });
 
