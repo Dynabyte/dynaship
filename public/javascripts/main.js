@@ -226,8 +226,7 @@ function renderBoard(player, round) {
  
     board += '<div class="scores">'
         +'<span><b class="number">'+round+'</b> rounds</span>'
-        +'<span><b class="number">'+hits+'</b> hits!</span>'
-        +'<span><b class="number">'+(round-shot+1)+'</b> missed</span></div>';
+        +'<span><b class="number">'+hits+'</b> hits!</span></div>';
  
     board += '</div>';
  
@@ -286,7 +285,7 @@ var Round = function (element, playerBoards, round, gameOverCallback) {
     }
 
     for (var i = 0; i < playerBoards.length; i++) {
-        if(playerBoards[i].round === undefined){
+        if (playerBoards[i].round === undefined) {
             askForMove(playerBoards[i], 
                 function (player) { return function (data) {
                     gotMove(player, data);
@@ -295,14 +294,12 @@ var Round = function (element, playerBoards, round, gameOverCallback) {
                     gotMove(player, undefined);
                 }}(playerBoards[i]));
         } else {
-            console.log("Stop shooting at", playerBoards[i].name);
             gotMove(playerBoards[i], undefined);
         }
     }
 
     element.append('<button class="next" disabled="disabled">Next round!</button>');
     element.find('button.next').click(function () {
-        console.log(playerBoards);
         new Round(element, playerBoards, round + 1, gameOverCallback);
     });
 };
