@@ -331,7 +331,38 @@ var Game = function(element, players, gameOverCallback) {
 
 
 var Players = function (element, initCallback) {
-    var players = {};
+
+    var PlayerDB = function () {
+        function _loadLocalStorage() {
+            var players = {};
+            if (localStorage && localStorage.players) {    
+                players = JSON.parse(localStorage["players"]);
+            }
+            return players;
+        }
+
+        function _saveLocalStorage(players) {
+            if (localStorage) {
+                localStorage["players"] = JSON.stringify(players);
+            }
+        }
+
+        var players = _loadLocalStorage();
+
+        return {
+            add: function (name, url) {
+                players[name] = url;
+                _saveLocalStorage(players);
+            },
+            all: function () {
+                return JSON.parse(JSON.stringify(players));
+            },
+            remove: function (name) {
+                delete players[name];
+                _saveLocalStorage(players);
+            }
+        };
+    }();
 
     var form = '<input type="text" name="url" class="url" placeholder="Url to AI"/> '
         +'<input type="text" name="playername" class="playername" placeholder="Player name"/>'
@@ -342,8 +373,10 @@ var Players = function (element, initCallback) {
 
         element.html(stuff);
 
+        var players = PlayerDB.all();
         for (name in players) {
-            element.append('<br><span>' + name + '</span> <span>' + players[name] + '</span>');
+            element.append('<div class="player"><span>' + name + '</span> <span>' + players[name] + '</span>'
+                +'<a href="#" class="delete" data-player="'+name+'">Remove</a></div>');
         }
 
         element.append('<br><br><button class="init">Start game</button>');
@@ -351,13 +384,21 @@ var Players = function (element, initCallback) {
         element.find('button.addPlayer').click(function () {
             var url = element.find("input.url");
             var name = element.find("input.playername");
-            players[name.val()] = url.val();
-            name.val("");
-            url.val("");
+            if (url.val() && name.val()) {
+                PlayerDB.add(name.val(), url.val());
+                name.val("");
+                url.val("");
+            }
+           
             render();
         });
         element.find('button.init').click(function () {
-            initCallback(players);
+            initCallback(PlayerDB.all());
+        });
+        element.find('a.delete').click(function (e) {
+            PlayerDB.remove($(this).attr('data-player'));
+            render();
+            return false;
         });
     }
 
@@ -372,9 +413,11 @@ $(function() {
 
     var players = new Players($("#addPlayers"), function (players) {
         $("#addPlayers").hide();
-        new Game($("#boards"), players, function(){console.log("Game over man, game over.")});
+        new Game($("#boards"), players, function(){
+            console.log("Game over man, game over.");
+        });
     });
-
+/*
     $('#addPlayers input.url').val('http://localhost:9000/getMove');
     $('#addPlayers input.playername').val('The I');
     $('#addPlayers button.addPlayer').click();
@@ -401,7 +444,7 @@ $(function() {
 
     /*$('#addPlayers input.url').val('http://192.168.52.220:8080');
     $('#addPlayers input.playername').val('The Nils');
-    $('#addPlayers button.addPlayer').click();*/
+    $('#addPlayers button.addPlayer').click();
 
-    $('#addPlayers button.init').click();
+    $('#addPlayers button.init').click();*/
 });
