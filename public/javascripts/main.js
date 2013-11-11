@@ -195,9 +195,9 @@ function renderBoard(player, round) {
     var hits = 0;
     var shot = 0;
     var last = player.shots[player.shots.length - 1];
-    for (var x = 0; x < player.board.length; x++) {
+    for (var y = 0; y < player.board.length; y++) {
         board += "<tr>"
-        for (var y = 0; y < player.board[x].length; y++) {
+        for (var x = 0; x < player.board.length; x++) {
             var position = player.board[x][y];
             var state = 'unknown';
             var content = '';
