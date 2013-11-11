@@ -14,7 +14,12 @@
         <link rel="stylesheet" href="stylesheets/main.css">
         <script src="javascripts/vendor/modernizr-2.6.1.min.js"></script>
         <style>
-        div.playerBoard {
+
+body {
+    text-align: center;
+}
+
+div.playerBoard {
     float: left;
     text-align: center;
 }
@@ -30,12 +35,50 @@ div.scores span {
     clear: both;
 }
 b.number {
-    font-family: Consolas, "Liberation Mono", Courier, monospace;;
+    font-family: Consolas, "Liberation Mono", Courier, monospace;
     width: 20px;
     display: inline-block;
     background-color: gray;
     color: white;
 }
+
+.player {
+    display: block;
+    width: 800px;
+    text-align: left;
+    margin: 0 auto;
+    border: 1px dotted white;
+}
+
+.player .name {
+    margin-right: 50px;
+    width: 300px;
+    display: inline-block;
+    text-align: right;
+}
+
+.player .url {
+    font-family: Consolas, "Liberation Mono", Courier, monospace;
+    font-size: 10px;
+    background-color: lightgray;
+    color: black;
+    display: inline-block;
+}
+
+.player a {
+    color: white;
+    float: right;
+    margin-right: 10px;
+}
+
+.player:hover {
+    border: 1px dotted gray;
+}
+
+.player:hover a {
+    color: black;
+}
+
 table {
     padding: 0px;
     margin: 10px;

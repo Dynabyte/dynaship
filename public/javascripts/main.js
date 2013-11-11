@@ -366,7 +366,7 @@ var Players = function (element, initCallback) {
 
     var form = '<input type="text" name="url" class="url" placeholder="Url to AI"/> '
         +'<input type="text" name="playername" class="playername" placeholder="Player name"/>'
-        +'<button class="addPlayer">Add player</button>';
+        +' <button class="addPlayer">Add player</button>';
 
     var body = $('<div></div>');
     element.append(body);
@@ -378,8 +378,8 @@ var Players = function (element, initCallback) {
 
         var players = PlayerDB.all();
         for (name in players) {
-            body.append('<div class="player"><span>' + name + '</span> <span>' + players[name] + '</span>'
-                +'<a href="#" class="delete" data-player="'+name+'">Remove</a></div>');
+            body.append('<div class="player"><span class="name">' + name + '</span> <span class="url">' + players[name] + '</span>'
+                +'<a href="#" class="delete" data-player="'+name+'">x</a></div>');
         }
 
         body.append('<br><br><button class="init">Start game</button>');
