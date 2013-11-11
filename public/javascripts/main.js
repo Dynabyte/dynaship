@@ -258,7 +258,7 @@ function shootAt(player, x, y) {
 }
 
 var Round = function (element, playerBoards, round, gameOverCallback) {
-    element.html("Playing round " + round + "!<br>");
+    element.html("");
     for (var i = 0; i < playerBoards.length; i++) {
         element.append(renderBoard(playerBoards[i], round));
     }
