@@ -273,11 +273,22 @@ var Round = function (element, playerBoards, round, gameOverCallback) {
         } else {
             player.shots.push(null);
         }
+
+        checkState(player);
         
         if (gotMoves.length == playerBoards.length) {
             element.find('button.next').removeAttr('disabled');
+            var allDone = true;
+            for (var i = 0; i < playerBoards.length; i++) {
+                if (!playerBoards[i].round) {
+                    allDone = false;
+                    break;
+                }
+            }
+            if (allDone) {
+                gameOverCallback(playerBoards);
+            }
         }
-        checkState(player);
     }
 
     function checkState(player) {
@@ -330,6 +341,24 @@ var Game = function(element, players, gameOverCallback) {
     }
 
     new Round(element, playerBoards, 0, gameOverCallback);
+};
+
+var GameOver = function(element, players) {
+    function sorter (a, b) {
+        var diff = a.round - b.round;
+        return diff == 0 ? 0 : diff / Math.abs(diff);
+    }
+
+    players.sort(sorter);
+
+    element.html('');
+    var table = '<table class="highscore">';
+    for (var i = 0; i < players.length; i++) {
+        var player = players[i];
+        table += '<tr><td>'+(i+1) + '.</td><td>' + player.name + '</td><td>' + player.round + '</td></tr>';
+    }
+    table += '</table>';
+    element.append(table);
 };
 
 
@@ -421,9 +450,15 @@ $(function() {
     var players = new Players($("#addPlayers"), function (players) {
         $("#addPlayers").hide();
         new Game($("#boards"), players, function(players){
-            console.log("Game over man, game over.");
-            console.log(players);
+            new GameOver($("#boards"), players);
         });
+    });
+
+    $(document).keyup(function(evt) {
+        if (evt.keyCode == 32 && $('button.next') && 'disabled' != $('button.next').attr('disabled')) {
+            $('button.next').click();
+            evt.preventDefault();
+        }
     });
 
 });
