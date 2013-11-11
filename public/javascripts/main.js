@@ -194,6 +194,7 @@ function renderBoard(player, round) {
     var board = '<div class="playerBoard'+done+'"><span class="theName">' + player.name + '</span><table>';
     var hits = 0;
     var shot = 0;
+    var last = player.shots[player.shots.length - 1];
     for (var x = 0; x < player.board.length; x++) {
         board += "<tr>"
         for (var y = 0; y < player.board[x].length; y++) {
@@ -217,6 +218,9 @@ function renderBoard(player, round) {
                 } else {
                     state = 'sea';
                 }
+            }
+            if (last && last.x == x && last.y == y) {
+                state += " last"
             }
             board += '<td class="position '+state+'">'+content+'</td>';
         }
@@ -261,7 +265,10 @@ var Round = function (element, playerBoards, round, gameOverCallback) {
         gotMoves.push({player: player, coordinates: coordinates});
 
         if (coordinates) {
-            shootAt(player, coordinates.x, coordinates.y);    
+            shootAt(player, coordinates.x, coordinates.y);  
+            player.shots.push(coordinates);
+        } else {
+            player.shots.push(null);
         }
         
         if (gotMoves.length == playerBoards.length) {
@@ -314,7 +321,8 @@ var Game = function(element, players, gameOverCallback) {
             url: players[player],
             board: JSON.parse(JSON.stringify(board)),
             ships: JSON.parse(JSON.stringify(ships)),
-            round: undefined
+            round: undefined,
+            shots: []
         });
     }
 
