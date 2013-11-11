@@ -224,7 +224,10 @@ function renderBoard(player, round) {
     }
     board += '</table>';
  
-    board += '<div class="scores"><span><b class="number">'+round+'</b> rounds</span><br><span><b class="number">'+hits+'</b> hits!</span><br><span><b class="number">'+(round-shot+1)+'</b> missed</span></div>';
+    board += '<div class="scores">'
+        +'<span><b class="number">'+round+'</b> rounds</span>'
+        +'<span><b class="number">'+hits+'</b> hits!</span>'
+        +'<span><b class="number">'+(round-shot+1)+'</b> missed</span></div>';
  
     board += '</div>';
  
