@@ -364,8 +364,8 @@ var Players = function (element, initCallback) {
         };
     }();
 
-    var form = '<input type="text" name="url" class="url" placeholder="Url to AI"/> '
-        +'<input type="text" name="playername" class="playername" placeholder="Player name"/>'
+    var form = '<input type="text" name="playername" class="playername" placeholder="Player name"/>'
+        +' <input type="text" name="url" class="url" placeholder="Url to AI"/> '
         +' <button class="addPlayer">Add player</button>';
 
     var body = $('<div></div>');
@@ -382,7 +382,9 @@ var Players = function (element, initCallback) {
                 +'<a href="#" class="delete" data-player="'+name+'">x</a></div>');
         }
 
-        body.append('<br><br><button class="init">Start game</button>');
+        if (Object.keys(players).length > 0) {
+                  body.append('<br><br><button class="init">Start game</button>');  
+        }
 
         element.find('button.addPlayer').click(function () {
             var url = element.find("input.url");
