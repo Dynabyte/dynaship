@@ -368,18 +368,21 @@ var Players = function (element, initCallback) {
         +'<input type="text" name="playername" class="playername" placeholder="Player name"/>'
         +'<button class="addPlayer">Add player</button>';
 
+    var body = $('<div></div>');
+    element.append(body);
+
     function render() {
         var stuff = form;
 
-        element.html(stuff);
+        body.html(form);
 
         var players = PlayerDB.all();
         for (name in players) {
-            element.append('<div class="player"><span>' + name + '</span> <span>' + players[name] + '</span>'
+            body.append('<div class="player"><span>' + name + '</span> <span>' + players[name] + '</span>'
                 +'<a href="#" class="delete" data-player="'+name+'">Remove</a></div>');
         }
 
-        element.append('<br><br><button class="init">Start game</button>');
+        body.append('<br><br><button class="init">Start game</button>');
 
         element.find('button.addPlayer').click(function () {
             var url = element.find("input.url");
@@ -408,7 +411,6 @@ var Players = function (element, initCallback) {
 };
 
 
-
 $(function() {
 
     var players = new Players($("#addPlayers"), function (players) {
@@ -417,34 +419,5 @@ $(function() {
             console.log("Game over man, game over.");
         });
     });
-/*
-    $('#addPlayers input.url').val('http://localhost:9000/getMove');
-    $('#addPlayers input.playername').val('The I');
-    $('#addPlayers button.addPlayer').click();
 
-    $('#addPlayers input.url').val('http://localhost:9000/getMove');
-    $('#addPlayers input.playername').val('The U');
-    $('#addPlayers button.addPlayer').click();
-
-    $('#addPlayers input.url').val('http://localhost:9000/getMove');
-    $('#addPlayers input.playername').val('The Them');
-    $('#addPlayers button.addPlayer').click();
-
-    $('#addPlayers input.url').val('http://localhost:9000/getMove');
-    $('#addPlayers input.playername').val('The Us');
-    $('#addPlayers button.addPlayer').click();
-
-    $('#addPlayers input.url').val('http://192.168.52.164:8080/make-move');
-    $('#addPlayers input.playername').val('The John');
-    $('#addPlayers button.addPlayer').click();
-
-    /*$('#addPlayers input.url').val('http://192.168.52.217:8080/dynaship/get-move');
-    $('#addPlayers input.playername').val('Batmans friend');
-    $('#addPlayers button.addPlayer').click();*/
-
-    /*$('#addPlayers input.url').val('http://192.168.52.220:8080');
-    $('#addPlayers input.playername').val('The Nils');
-    $('#addPlayers button.addPlayer').click();
-
-    $('#addPlayers button.init').click();*/
 });
