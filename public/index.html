@@ -167,19 +167,94 @@ table.highscore td {
    }
 }
 
+.banner {
+    height: 60px;
+    line-height: 60px;
+    background-color: #008080;
+}
+    .banner p {
+        margin: 0 0 0 10px;
+        text-align: left;
+        color: #FFF;
+        font-size: 36px;
+    }
+    .banner .dynalogo {
+        float: right;
+        max-height: 50%;
+        margin: 15px 5px 0 0;
+    }
+.line {
+    height: 3px;
+    background-color: #04A8B2;"
+}
+    
+.canvas-board {
+    margin-top: 10px;
+    float: left;
+}
+    .canvas-board .player-name {
+        text-align: left;
+        margin: 0 10px 0 10px;
+        font-weight: bold;
+        padding-left: 10px;
+    }
+
+    .canvas-board .placement {
+        float: right;
+        margin-right: 10px;
+        padding: 0 5px 0 5px;
+        color: #FFF;
+    }
+
+    .canvas-board .leader {
+        background-color: #008080;
+        margin-right: 10px;
+    }
+    
+    .canvas-board .winner {
+        color: #FFF;
+        background-color: #04A8B2;
+    }
+    
+    .canvas-board .done {
+        color: #FFF;
+        background-color: #D0D0D0;
+    }
+
+.canvas-wrapper {
+    margin: 10px 10px 10px 10px;
+    background-color: #FAFAFA;
+}
+
+.canvases-container .canvas {
+    margin: 5px 5px 0 5px;
+}
+
+
 
 </style>
-    </head>
     <body>
+    <div class="banner">
+        <p>DynaHack 2013
+            <img class="dynalogo" src="images/dynalogo.png" />
+        </p>
+    </div>
+    <div class="line"></div>
     
+    <div class="canvases-container">
+
     <div id="addPlayers">
-        <div class="ocean"><img class="ship" src="images/ship.png"></div>
+        <div class="ocean"><img class="ship" src="images/ship.png" /></div>
     </div>        
     <div id="boards"></div>
+    
+    </div>
 
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
+        <script src="javascripts/vendor/easeljs-0.7.0.min.js"></script>
         <script>window.jQuery || document.write('<script src="javascripts/vendor/jquery-1.8.0.min.js"><\/script>')</script>
         <script src="javascripts/main.js"></script>
+
 
     </body>
 </html>

@@ -1,4 +1,112 @@
+var canvasSize = 300;
 
+function updatePositionOnStage(stage, boardSize, position, state, isLast, isDuplicate, textContent) {
+
+    var margin = (canvasSize / boardSize) / 10;
+    var squareSize = (canvasSize - margin) / boardSize - margin;
+    var cornerRadius = squareSize / 5;
+
+    var seaworthyColor = "#FF1A74";
+    var capsizedColor = "#04A8B2";
+    var missedColor = "#A0B0FF";
+    var borderColor = isDuplicate ? "#FF0000" : "#FFFFDD";
+    var textColor = "#FFF";
+       
+    var borderWidth = canvasSize / 50;
+    var font = (squareSize / 2) + "px Arial";
+    
+    var color;
+    
+    var border = isLast;
+    switch(state) {
+    case "seaworthy": color = seaworthyColor; cornerRadius = 0; break;
+    case "capsized": {
+        border = true;
+        color = capsizedColor;
+        borderColor = "#048892";
+        borderWidth = canvasSize / 100; 
+        cornerRadius = 0;
+        break;
+    }
+    case "sea": color = missedColor; break;
+    default: return;
+    }
+    var shape = position.shape;
+    position.shape.graphics.clear();
+    position.shape.graphics.beginFill(color).drawRoundRect(0, 0, squareSize, squareSize, cornerRadius);
+    
+    if (border) {    
+        position.shape.graphics.beginStroke(borderColor).setStrokeStyle(borderWidth).drawRoundRect(0, 0, squareSize, squareSize, cornerRadius);
+    }
+    
+    if (textContent) {
+        var text = position.text;
+        if (position.text) {
+            stage.removeChild(position.text);
+        }
+        position.text = new createjs.Text(textContent, font, textColor);
+        position.text.x = shape.x + squareSize / 2 - position.text.getMeasuredWidth() / 2 ;
+        position.text.y = shape.y + squareSize / 2 - position.text.getMeasuredLineHeight() / 2 - margin / 2;
+
+        stage.addChild(position.text);
+    }
+}
+
+function shipHealth(ships) {
+    var shipHealth = 0;
+    for (var i = 0; i < ships.length; i++) {
+        shipHealth += ships[i].life;
+    }
+    return shipHealth;
+}
+
+function placeBoard(player, board) {
+    var title = '<div class="placement"></div><div class="player-name">' + player.name + '</div>';
+    var canvas = '<canvas id="' + player.id + 'Canvas" class="canvas" width="' + canvasSize + '" height="' + canvasSize + '"/>';
+    var canvasWrapper = '<div class="canvas-wrapper">' + canvas + '</div>';
+    
+    var health = shipHealth(player.ships);
+    
+    var scores = '<div class="scores">'
+        +'<span><b class="number round">'+0+'</b> rounds</span>'
+        +'<span><b id="' + player.id + 'ToGo" class="number">' + health + '</b> left!</span></div>';
+    
+    var boardWrapper = '<div id="' +  player.id + 'CanvasBoard" class="canvas-board">' + title + canvasWrapper + scores + '</div>';
+    
+    $(".canvases-container").append(boardWrapper);
+    var stage = new createjs.Stage(player.id +"Canvas");
+    var margin = (canvasSize / board.length) / 10;
+    var squareSize = (canvasSize - margin) / board.length - margin;
+    var cornerRadius = squareSize / 5;
+    
+    var positions = [];
+    for (var i=0; i<board.length; i++) {
+        var row = [];
+        for (var j=0; j<board[i].length; j++) {
+            
+            var shape = new createjs.Shape();
+            shape.graphics.beginFill("#D0D0D0").drawRoundRect(0, 0, squareSize, squareSize, cornerRadius);
+            shape.x = margin + (squareSize + margin) * i;
+            shape.y = margin + (squareSize + margin) * j;
+            stage.addChild(shape);
+            
+            var position = {"shape": shape};
+            row[j] = position;
+            stage.addChild(shape);
+        }
+        positions.push(row);
+    }
+    
+    var canvasBoard = {
+        name: player.name,
+        stage: stage,
+        positions: positions
+    }
+    
+    stage.update();
+
+    return canvasBoard;
+}
 
 var randomIntegerBetween = function (a, b) {
   return Math.floor(Math.random()*b + a);
@@ -16,7 +124,7 @@ var generate = function (battleAreaSize, ships) {
       row[j] = {
         ship : undefined,
         shot : false,
-        state : "", 
+        state: ""
       };
     }
     battleArea.push(row);
@@ -96,26 +204,13 @@ var generate = function (battleAreaSize, ships) {
   return battleArea;
 };
 
-function printShip(ship){
-  if(ship == 1){
-    return "#FF0000";
-  } else if(ship == 2)  {
-    return "#00FF00";
-  } else if(ship == 3) {
-    return "#0000FF";
-  } else if(ship == 4) {
-    return "#FFFF00";
-  } else {
-    return "#00FFFF";
-  }
-}
-
 var ships = [
   {id : 1, size : 5, state: "alive", life: 5},
   {id : 2, size : 4, state: "alive", life: 4},
   {id : 3, size : 3, state: "alive", life: 3},
   {id : 4, size : 2, state: "alive", life: 2},
   {id : 5, size : 3, state: "alive", life: 3},
+  {id : 6, size : 5, state: "alive", life: 5}
 ];
 
 
@@ -181,27 +276,26 @@ function askForMove(player, success, error) {
         error: error,
         dataType: 'json',
         contentType: 'application/json',
-        timeout: 500
+        timeout: 30000
     });
 }
 
-function renderBoard(player, round) {
-    var done = "";
+function renderBoard(player, health, isDone, isLeader, isWinner, canvasBoard, round) { 
+
     if (player.round) {
-        done = " done";
         round = player.round;
     }
 
-    var shipHealth = 0;
-    for (var i = 0; i < player.ships.length; i++) {
-        shipHealth += player.ships[i].life;
-    }
-
-
-    var board = '<div class="playerBoard'+done+'"><span class="theName">' + player.name + '</span><table>';
     var last = player.shots[player.shots.length - 1];
+    var duplicate;
+    for (var i=0; i<player.shots.length - 1; i++) {
+        var shot = player.shots[i];
+        if (last && shot && shot.x == last.x && shot.y == last.y) {
+            duplicate = shot;
+        }
+    }
+    
     for (var y = 0; y < player.board.length; y++) {
-        board += "<tr>"
         for (var x = 0; x < player.board.length; x++) {
             var position = player.board[x][y];
             var state = 'unknown';
@@ -222,22 +316,44 @@ function renderBoard(player, round) {
                     state = 'sea';
                 }
             }
-            if (last && last.x == x && last.y == y) {
-                state += " last"
-            }
-            board += '<td class="position '+state+'">'+content+'</td>';
+             
+            var isLast = last && last.x == x && last.y == y;
+            var isDuplicate = isLast && duplicate && duplicate.x == x && duplicate.y == y;
+            
+
+            updatePositionOnStage(canvasBoard.stage, player.board.length, canvasBoard.positions[x][y], state, isLast, isDuplicate, content);
+
         }
-        board += "</tr>";
     }
-    board += '</table>';
- 
-    board += '<div class="scores">'
-        +'<span><b class="number">'+round+'</b> rounds</span>'
-        +'<span><b class="number">'+shipHealth+'</b> left!</span></div>';
- 
-    board += '</div>';
- 
-    return board;
+    $("#" + player.id + "CanvasBoard .round").html(round);
+    var id = "#" + player.id + "ToGo";
+    $(id).html(health);
+    
+    var selector = "#" + player.id + "CanvasBoard";
+    
+    
+    $(selector + " .placement").removeClass("leader").html("");
+    
+    if (isWinner) {
+        $(selector + " .player-name").removeClass("done");
+        $(selector + " .player-name").addClass("winner");
+        $(selector + " .placement").addClass("leader").html("Winner");
+        
+    } else {
+        $(selector + " .player-name").removeClass("winner");
+    
+        if (isLeader) {
+            $(selector + " .placement").addClass("leader").html("Leader");
+            
+        } else if (isDone) {
+            $(selector + " .player-name").removeClass("done");
+            $(selector + " .player-name").addClass("done");
+            $(selector + " .placement").html("Finished");
+        
+        }
+    }    
+
+    canvasBoard.stage.update();
 }
 
 function shootAt(player, x, y) {
@@ -257,21 +373,22 @@ function shootAt(player, x, y) {
     }
 }
 
-var Round = function (element, playerBoards, round, gameOverCallback) {
+var Round = function (element, playerBoards, canvasBoards, round, gameOverCallback) {
     element.html("");
-    for (var i = 0; i < playerBoards.length; i++) {
-        element.append(renderBoard(playerBoards[i], round));
+    
+    var maxHealth = 0;
+    for (var i=0; i < playerBoards[0].ships.length; i++) {
+        maxHealth += playerBoards[0].ships[i].size;
     }
 
     var gotMoves = [];
     function gotMove(player, coordinates) {
+    
         gotMoves.push({player: player, coordinates: coordinates});
 
         if (coordinates) {
             shootAt(player, coordinates.x, coordinates.y);  
             player.shots.push(coordinates);
-        } else {
-            player.shots.push(null);
         }
 
         checkState(player);
@@ -286,20 +403,44 @@ var Round = function (element, playerBoards, round, gameOverCallback) {
                 }
             }
             if (allDone) {
-                gameOverCallback(playerBoards);
+                gameOverCallback(playerBoards);  
             }
+
+                    var shipHealths = [];
+
+        var leaderToGo = null;
+        var shortestShotsLength = null;
+        for (var i = 0; i < playerBoards.length; i++) {
+
+            var health = shipHealth(playerBoards[i].ships);
+            shipHealths[playerBoards[i].id] = health; 
+            
+            leaderToGo = (leaderToGo == null || health < leaderToGo) ? health : leaderToGo;
+            shortestShotsLength = (shortestShotsLength == null || playerBoards[i].shots.length < shortestShotsLength) ? playerBoards[i].shots.length : shortestShotsLength;
         }
+
+        for (var i = 0; i < playerBoards.length; i++) {
+            var health = shipHealths[playerBoards[i].id];
+            var isDone = playerBoards[i].round !== undefined;
+            var isLeader = health == leaderToGo && leaderToGo != 0 && health < maxHealth;
+            var isWinner = isDone && leaderToGo == 0 && playerBoards[i].shots.length == shortestShotsLength;
+            renderBoard(playerBoards[i], health, isDone, isLeader, isWinner, canvasBoards[i], round);
+        } 
+            
+        }
+        
+
     }
 
     function checkState(player) {
-        if(player.round === undefined) {
+        if (player.round === undefined) {
             var someAlive = false;
             for(ship in player.ships) {
                 if(player.ships[ship].life > 0) {
                     someAlive = true;
                 }
             }
-            if(!someAlive) {
+            if (!someAlive) {
                 player.round = round;
             }
         }
@@ -319,28 +460,56 @@ var Round = function (element, playerBoards, round, gameOverCallback) {
         }
     }
 
+            // var shipHealths = [];
+    
+            // var leaderToGo = null;
+            // var shortestShotsLength = null;
+            // for (var i = 0; i < playerBoards.length; i++) {
+ 
+                // var health = shipHealth(playerBoards[i].ships);
+                // shipHealths[playerBoards[i].id] = health; 
+                
+                // leaderToGo = (leaderToGo == null || health < leaderToGo) ? health : leaderToGo;
+                // shortestShotsLength = (shortestShotsLength == null || playerBoards[i].shots.length < shortestShotsLength) ? playerBoards[i].shots.length : shortestShotsLength;
+            // }
+
+            // for (var i = 0; i < playerBoards.length; i++) {
+                // var health = shipHealths[playerBoards[i].id];
+                // var isDone = playerBoards[i].round !== undefined;
+                // var isLeader = health == leaderToGo && leaderToGo != 0 && health < maxHealth;
+                // var isWinner = isDone && leaderToGo == 0 && playerBoards[i].shots.length == shortestShotsLength;
+                // renderBoard(playerBoards[i], health, isDone, isLeader, isWinner, canvasBoards[i], round);
+            // }
+    
     element.append('<button class="next" disabled="disabled">Next round!</button>');
     element.find('button.next').click(function () {
-        new Round(element, playerBoards, round + 1, gameOverCallback);
+        new Round(element, playerBoards, canvasBoards, round + 1, gameOverCallback);
     });
+    
 };
 
 var Game = function(element, players, gameOverCallback) {
     var board = generate(10, ships);
-
+  
     var playerBoards = [];
-    for (player in players) {
+    var canvasBoards = [];
+    i = 0;
+    for (playerName in players) {
         playerBoards.push({
-            name: player,
-            url: players[player],
+            id: i,
+            name: playerName,
+            url: players[playerName],
             board: JSON.parse(JSON.stringify(board)),
             ships: JSON.parse(JSON.stringify(ships)),
             round: undefined,
             shots: []
         });
+        var canvasBoard = placeBoard(playerBoards[i], board);
+        canvasBoards.push(canvasBoard);
+        i++;
     }
 
-    new Round(element, playerBoards, 0, gameOverCallback);
+    new Round(element, playerBoards, canvasBoards, 0, gameOverCallback);
 };
 
 var GameOver = function(element, players) {
@@ -360,7 +529,6 @@ var GameOver = function(element, players) {
     table += '</table>';
     element.append(table);
 };
-
 
 var Players = function (element, initCallback) {
 
@@ -439,11 +607,10 @@ var Players = function (element, initCallback) {
         });
     }
 
-
     render();
+
     return {};
 };
-
 
 $(function() {
 
