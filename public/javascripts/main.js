@@ -12,7 +12,7 @@ function updatePositionOnStage(stage, boardSize, position, state, isLast, isDupl
     var borderColor = isDuplicate ? "#FF0000" : "#FFFFDD";
     var textColor = "#FFF";
        
-    var borderWidth = canvasSize / 50;
+    var borderWidth = canvasSize / (boardSize * 5);
     var font = (squareSize / 2) + "px Arial";
     
     var color;
@@ -210,7 +210,6 @@ var ships = [
   {id : 3, size : 3, state: "alive", life: 3},
   {id : 4, size : 2, state: "alive", life: 2},
   {id : 5, size : 3, state: "alive", life: 3},
-  {id : 6, size : 5, state: "alive", life: 5}
 ];
 
 
@@ -428,7 +427,6 @@ var Round = function (element, playerBoards, canvasBoards, round, gameOverCallba
         } 
             
         }
-        
 
     }
 
@@ -459,27 +457,6 @@ var Round = function (element, playerBoards, canvasBoards, round, gameOverCallba
             gotMove(playerBoards[i], undefined);
         }
     }
-
-            // var shipHealths = [];
-    
-            // var leaderToGo = null;
-            // var shortestShotsLength = null;
-            // for (var i = 0; i < playerBoards.length; i++) {
- 
-                // var health = shipHealth(playerBoards[i].ships);
-                // shipHealths[playerBoards[i].id] = health; 
-                
-                // leaderToGo = (leaderToGo == null || health < leaderToGo) ? health : leaderToGo;
-                // shortestShotsLength = (shortestShotsLength == null || playerBoards[i].shots.length < shortestShotsLength) ? playerBoards[i].shots.length : shortestShotsLength;
-            // }
-
-            // for (var i = 0; i < playerBoards.length; i++) {
-                // var health = shipHealths[playerBoards[i].id];
-                // var isDone = playerBoards[i].round !== undefined;
-                // var isLeader = health == leaderToGo && leaderToGo != 0 && health < maxHealth;
-                // var isWinner = isDone && leaderToGo == 0 && playerBoards[i].shots.length == shortestShotsLength;
-                // renderBoard(playerBoards[i], health, isDone, isLeader, isWinner, canvasBoards[i], round);
-            // }
     
     element.append('<button class="next" disabled="disabled">Next round!</button>');
     element.find('button.next').click(function () {
