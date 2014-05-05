@@ -43,7 +43,7 @@ exports.post = function(req, res) {
       });  
     });  
 
-    post_req.setTimeout(500);
+    post_req.setTimeout(1500);
     post_req.on('timeout', function() {
       res.send('Timeout');
     });
