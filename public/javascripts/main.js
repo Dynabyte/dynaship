@@ -275,7 +275,7 @@ function askForMove(player, success, error) {
         error: error,
         dataType: 'json',
         contentType: 'application/json',
-        timeout: 500
+        timeout: 1500
     });
 }
 
