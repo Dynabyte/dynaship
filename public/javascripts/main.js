@@ -384,11 +384,11 @@ var Round = function (element, playerBoards, canvasBoards, round, gameOverCallba
     function gotMove(player, coordinates) {
         if (coordinates && coordinates.x >= 0 && coordinates.x < player['board'].length && coordinates.y >= 0 && coordinates.y < player['board'].length) {
         } else {
-           coordinates = undefined;
+            coordinates = undefined;
         }
 
         gotMoves.push({player: player, coordinates: coordinates});
-        if (coordinates && coordinates.x > 0) {
+        if (coordinates) {
             shootAt(player, coordinates.x, coordinates.y);  
             player.shots.push(coordinates);
         }
