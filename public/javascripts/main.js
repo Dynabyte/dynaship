@@ -382,10 +382,13 @@ var Round = function (element, playerBoards, canvasBoards, round, gameOverCallba
 
     var gotMoves = [];
     function gotMove(player, coordinates) {
-    
-        gotMoves.push({player: player, coordinates: coordinates});
+        if (coordinates && coordinates.x >= 0 && coordinates.x < player['board'].length && coordinates.y >= 0 && coordinates.y < player['board'].length) {
+        } else {
+           coordinates = undefined;
+        }
 
-        if (coordinates) {
+        gotMoves.push({player: player, coordinates: coordinates});
+        if (coordinates && coordinates.x > 0) {
             shootAt(player, coordinates.x, coordinates.y);  
             player.shots.push(coordinates);
         }
@@ -405,29 +408,26 @@ var Round = function (element, playerBoards, canvasBoards, round, gameOverCallba
                 gameOverCallback(playerBoards);  
             }
 
-                    var shipHealths = [];
+            var shipHealths = [];
 
-        var leaderToGo = null;
-        var shortestShotsLength = null;
-        for (var i = 0; i < playerBoards.length; i++) {
+            var leaderToGo = null;
+            var shortestShotsLength = null;
+            for (var i = 0; i < playerBoards.length; i++) {
+                var health = shipHealth(playerBoards[i].ships);
+                shipHealths[playerBoards[i].id] = health; 
+                
+                leaderToGo = (leaderToGo == null || health < leaderToGo) ? health : leaderToGo;
+                shortestShotsLength = (shortestShotsLength == null || playerBoards[i].shots.length < shortestShotsLength) ? playerBoards[i].shots.length : shortestShotsLength;
+            }
 
-            var health = shipHealth(playerBoards[i].ships);
-            shipHealths[playerBoards[i].id] = health; 
-            
-            leaderToGo = (leaderToGo == null || health < leaderToGo) ? health : leaderToGo;
-            shortestShotsLength = (shortestShotsLength == null || playerBoards[i].shots.length < shortestShotsLength) ? playerBoards[i].shots.length : shortestShotsLength;
+            for (var i = 0; i < playerBoards.length; i++) {
+                var health = shipHealths[playerBoards[i].id];
+                var isDone = playerBoards[i].round !== undefined;
+                var isLeader = health == leaderToGo && leaderToGo != 0 && health < maxHealth;
+                var isWinner = isDone && leaderToGo == 0 && playerBoards[i].shots.length == shortestShotsLength;
+                renderBoard(playerBoards[i], health, isDone, isLeader, isWinner, canvasBoards[i], round);
+            }
         }
-
-        for (var i = 0; i < playerBoards.length; i++) {
-            var health = shipHealths[playerBoards[i].id];
-            var isDone = playerBoards[i].round !== undefined;
-            var isLeader = health == leaderToGo && leaderToGo != 0 && health < maxHealth;
-            var isWinner = isDone && leaderToGo == 0 && playerBoards[i].shots.length == shortestShotsLength;
-            renderBoard(playerBoards[i], health, isDone, isLeader, isWinner, canvasBoards[i], round);
-        } 
-            
-        }
-
     }
 
     function checkState(player) {
